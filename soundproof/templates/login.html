@@ -1,0 +1,15 @@
+{% extends "theme.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h4 id='message'>{{message}}</h4>
+<form method="post">
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input class="form-control" name="email" id="email" required>
+        <label for="password">Password</label>
+        <input class="form-control" type="password" name="password" id="password" required>
+        <input class="btn btn-lg btn-primary" type="submit" id="btn-submit" value="Log In">
+    </div>
+</form>
+{% endblock %}
