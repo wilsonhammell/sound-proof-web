@@ -1,14 +1,22 @@
 from . import db
 from flask_login import UserMixin
 import re
+
+
 from werkzeug.security import generate_password_hash, check_password_hash
+import secrets
+import base64
+
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(64))
+    otp_secret = db.Column(db.String(32))
+    twofa_device_id= db.Column(db.String(32), default='')
     twofa_enabled = db.Column(db.Boolean, default=False)
+    current_totp = db.Column(db.String(6), default='645852')
 
     def __repr__(self):
         return '<User %r>' % self.email
@@ -36,6 +44,7 @@ def register_account(name, email, password):
         email=email,
         username=name,
         password_hash=generate_password_hash(password, method='sha256'),
+        otp_secret = secrets.token_hex(32)
     )
 
     db.session.add(user)
@@ -44,7 +53,14 @@ def register_account(name, email, password):
     return True, None
 
 
-def login_account(email, password):
+def two_factor_activation(email, totp):
+    user = User.query.filter_by(email=email).first()
+    user.twofa_enabled = not user.twofa_enabled
+    db.session.commit()
+    return True
+
+
+def login_account(email, password, totp=None):
     if not is_email(email):
         return None, "Email entered doesn't match requirements"
 
@@ -54,7 +70,15 @@ def login_account(email, password):
     user = User.query.filter_by(email=email).first()
     if(user):
         if(check_password_hash(user.password_hash, password)):
-            return user, None
+            if(user.twofa_enabled):
+                if(user.current_totp==totp):
+                    return user, None
+                elif(totp==None):
+                    return 0, None
+                else:
+                    return None, "Incorrect code, please wait for the code to refresh and try again"
+            else:
+                return user, None
         else:
             return None, "Password is incorrect"
     return None, "No account exists with that email"

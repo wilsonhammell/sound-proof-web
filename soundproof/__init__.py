@@ -1,6 +1,7 @@
 from flask import *
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_qrcode import QRcode
 from os import path
 
 db = SQLAlchemy()
@@ -8,7 +9,7 @@ DB_NAME = "soundproof.db"
 
 def launch_website():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'm78hn3g8m6mg5f46g4869m3uigy40m'
+    app.config['SECRET_KEY'] = 'm78hn3g8m6mg54f46g4869m3uigy40m'
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     db.init_app(app)
 
@@ -25,6 +26,8 @@ def launch_website():
     login_manager = LoginManager()
     login_manager.login_view = 'authentication.login'
     login_manager.init_app(app)
+
+    QRcode(app)
 
     @login_manager.user_loader
     def load_user(id):
