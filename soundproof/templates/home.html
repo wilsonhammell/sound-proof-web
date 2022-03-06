@@ -10,7 +10,57 @@
 <h2>
     Record audio
 </h2>
+<audio controls></audio>
+<br>
+<button id="record">Record</button>
+<script>
+    var audio = document.querySelector('audio');
+    var constraints = { audio: true };
 
+    navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+        var mediaRecorder = new MediaRecorder(stream);
+        var chunks = [];
+        var record = document.getElementById('record');
+
+        mediaRecorder.addEventListener('dataavailable', function (event) {
+            chunks.push(event.data);
+        });
+
+        mediaRecorder.addEventListener('stop', function () {
+            var blob = new Blob(chunks, { type: 'audio/wav' });
+            var url = URL.createObjectURL(blob);
+            audio.src = url;
+
+            var data = new FormData()
+            data.append('file', blob, 'file')
+
+            fetch('/', name = '{{ user.username }}', {
+                method: 'POST',
+                body: data
+
+            }).then(response => response.json()
+            ).then(json => {
+                console.log(json)
+            });
+            chunks = [];
+        });
+
+        record.addEventListener('click', function () {
+            mediaRecorder.start();
+            record.disabled = true;
+            timeout = setTimeout(function () { stopRecording(); }, 3000)
+        });
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            record.disabled = false;
+        }
+    });
+</script>
+
+<br>
+<br>
+<br>
 <div><a href="/twofa_register">2FA Setup</a></div>
 
 
