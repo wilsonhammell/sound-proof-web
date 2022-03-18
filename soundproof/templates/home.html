@@ -1,3 +1,4 @@
+<script>const browserTime = new Date(); </script>
 {% extends "theme.html" %}
 {% block title %}Home{% endblock %}
 
@@ -10,11 +11,21 @@
 <h2>
     Record audio
 </h2>
-<audio controls></audio>
+<audio id="audio1" controls></audio>
 <br>
 <button id="record">Record</button>
+
+<script type="text/javascript" src="{{ url_for('static', filename="bower_components/crypto-js/crypto-js.js") }}"></script>
 <script>
-    var audio = document.querySelector('audio');
+    const serverTime = {{ servertime }};
+    const offset = browserTime.valueOf()/1000 - serverTime
+    console.log("SERVER TIME:", serverTime);
+    console.log("BROWSER TIME:", browserTime.valueOf() / 1000);
+    console.log("OFFSET:", offset);
+
+    var recordingTime;
+
+    var audio = document.getElementById('audio1');
     var constraints = { audio: true };
 
     navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
@@ -31,22 +42,52 @@
             var url = URL.createObjectURL(blob);
             audio.src = url;
 
+
+            console.log(blob)
+
+            var reader = new FileReader();
+            reader.onloadend = () => {
+                var audioB64 = reader.result;
+                console.log(audioB64);
+                console.log(typeof audioB64);
+
+                var prefix = audioB64.substr(0, 22);
+                var encryptable_portion = audioB64.substr(22);
+                console.log(prefix)
+                console.log(encryptable_portion)
+
+                var key = CryptoJS.enc.Latin1.parse('12345678123456781234567812345678'); //generate randomly and encrypt with rsa
+                var iv = CryptoJS.enc.Latin1.parse('1234567812345678'); //also generate random but can be passed along unencrypted
+                var encryption = CryptoJS.AES.encrypt(encryptable_portion, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 })
+                var encrypted = encryption.toString();
+                var decrypted = CryptoJS.AES.decrypt(encrypted, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8);
+                console.log(encryption.key.toString());
+                console.log("CIPHERTEXT", encrypted);
+                console.log("DECRYPTED", decrypted);
+
+                var decoded = new Audio(prefix + decrypted);
+                decoded.play();
+            }
+            reader.readAsDataURL(blob);
+
+
             var data = new FormData()
             data.append('file', blob, 'file')
 
-            fetch('/', name = '{{ user.username }}', {
+            fetch('/', {
                 method: 'POST',
                 body: data
 
-            }).then(response => response.json()
-            ).then(json => {
-                console.log(json)
             });
             chunks = [];
         });
 
         record.addEventListener('click', function () {
             mediaRecorder.start();
+            recordingTime = new Date();
+            //might be plus
+            recordingTime = recordingTime.valueOf() / 1000 - offset;
+            console.log("RECORDING START AT SERVER TIME:", recordingTime);
             record.disabled = true;
             timeout = setTimeout(function () { stopRecording(); }, 3000)
         });
