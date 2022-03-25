@@ -1,4 +1,3 @@
-<script>const browserTime = new Date(); </script>
 {% extends "theme.html" %}
 {% block title %}Home{% endblock %}
 
@@ -17,16 +16,9 @@
 
 <script type="text/javascript" src="{{ url_for('static', filename="bower_components/crypto-js/crypto-js.js") }}"></script>
 <script>
-    const serverTime = {{ servertime }};
-    const offset = browserTime.valueOf()/1000 - serverTime
-    console.log("SERVER TIME:", serverTime);
-    console.log("BROWSER TIME:", browserTime.valueOf() / 1000);
-    console.log("OFFSET:", offset);
-
-    var recordingTime;
-
     var audio = document.getElementById('audio1');
     var constraints = { audio: true };
+    var recordingTime;
 
     navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
         var mediaRecorder = new MediaRecorder(stream);
@@ -70,24 +62,19 @@
             }
             reader.readAsDataURL(blob);
 
-
             var data = new FormData()
             data.append('file', blob, 'file')
 
             fetch('/', {
                 method: 'POST',
                 body: data
-
             });
             chunks = [];
         });
 
         record.addEventListener('click', function () {
+            Sync();
             mediaRecorder.start();
-            recordingTime = new Date();
-            //might be plus
-            recordingTime = recordingTime.valueOf() / 1000 - offset;
-            console.log("RECORDING START AT SERVER TIME:", recordingTime);
             record.disabled = true;
             timeout = setTimeout(function () { stopRecording(); }, 3000)
         });
@@ -97,6 +84,33 @@
             record.disabled = false;
         }
     });
+
+    function Sync() {
+        console.log("syncin")
+        var timeRequest = new XMLHttpRequest();
+        var requestTime = (new Date).getTime();
+
+        timeRequest.open('GET', "{{ url_for('spAPI.servertime') }}");
+        timeRequest.onreadystatechange = function () {
+            if (timeRequest.readyState != 4) {
+                return;
+            }
+            var responseTime = (new Date).getTime();
+            var rtdLatency = (responseTime - requestTime)/2;
+            var serverTimeAtRequest = parseFloat(timeRequest.response);
+
+            serverTime = serverTimeAtRequest+rtdLatency;
+
+            console.log("client time request made", requestTime.valueOf());
+            console.log("client time recieve response", responseTime.valueOf());
+            console.log("latency", rtdLatency.valueOf());
+            console.log("server's time when request recieved", serverTimeAtRequest);
+            console.log("server time + latency", serverTime);
+
+            recordingTime = serverTime.valueOf();
+        };
+        timeRequest.send(null);
+    }
 </script>
 
 <br>

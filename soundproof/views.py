@@ -17,4 +17,4 @@ def home():
         return render_template('home.html', user=current_user)
 
     else:
-        return render_template('home.html', user=current_user, servertime=time.time())
+        return render_template('home.html', user=current_user)

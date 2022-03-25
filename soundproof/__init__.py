@@ -15,10 +15,12 @@ def launch_website():
 
     from .views import views
     from .authentication import authentication
+    from .spAPI import spAPI
     from .models import User
 
     app.register_blueprint(views, url_prefix="/")
     app.register_blueprint(authentication, url_prefix="/")
+    app.register_blueprint(spAPI, url_prefix="/")
 
     if (not path.exists('soundproof/' + DB_NAME)):
         db.create_all(app=app)
