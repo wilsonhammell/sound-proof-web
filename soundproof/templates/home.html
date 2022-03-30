@@ -15,7 +15,17 @@
 <button id="record">Record</button>
 
 <script type="text/javascript" src="{{ url_for('static', filename="bower_components/crypto-js/crypto-js.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="bower_components/jsrsasign-all-min.js") }}"></script>
 <script>
+    const pubKey = "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq1tJbelqOaFTmW+hhgMXFnZSrHEaGbGa4IkPpRHDuO4ntRn3yheP2NzExdaad1Jx3NTI9n7PnxU4S4KM+1nAjW0tjnI1BpcXS+KWQwrXy/Sw64cb2x+9N3r4tkveg8c8cetADTSHNj8Tn+7y8d9HDZG16efOrnDNv5TrzAdBZ5AWN+hIOUkm8prBAShbnPu+aS2wp9PQQeSVjRmEU12oAkLRiMtHGHGn0azLUS+LvvwbvaVPnRBVAdtxjvlORM0B8wr+FgxYq5tOIK8yZfBGMkG6mK2LC13C3Vq5oyIy7Kip4oqoumvKjbkYqYio1IO2DgGr7SVPRL9SiDKm9cmebQIDAQAB-----END PUBLIC KEY-----";
+
+    pubKeyObj = KEYUTIL.getKey(pubKey);
+
+    const message = "work maybe?"
+    var encryptedData = KJUR.crypto.Cipher.encrypt(message, pubKeyObj, "RSA");
+
+    console.log("decrypted data: ", hextob64(encryptedData));
+
     var audio = document.getElementById('audio1');
     var constraints = { audio: true };
     var recordingTime;

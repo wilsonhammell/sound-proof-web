@@ -7,6 +7,5 @@ import os
 spAPI = Blueprint('spAPI', __name__)
 
 @spAPI.route("/servertime", methods=['GET'])
-@login_required
 def servertime():
 	return jsonify(time.time()*1000)
