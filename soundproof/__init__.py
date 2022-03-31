@@ -9,7 +9,7 @@ DB_NAME = "soundproof.db"
 
 def launch_website():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'm78hn3g8m6mg54f46g4869m3uigy40m'
+    app.config['SECRET_KEY'] = 'dzk4NDFlZ2U0cmg5NjRlOTY4NGc5NjhKS2V3OGRyZnBuMnRydSt6ZGY0eTIrc3R5K2oyeTc4Mmo0WGIrdDR5dWorc3I0dDErajc0c0hKdCs0MXJldGErODk0MzJldzRjKzFhMmV3Njc4YTI='
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     db.init_app(app)
 

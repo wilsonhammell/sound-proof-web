@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user
-from .models import register_account, login_account, two_factor_activation
+from .models import register_account, login_account, two_factor_activation, get_public_key
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import copy
+import time
 
 authentication = Blueprint('authentication', __name__)
 
@@ -17,8 +19,9 @@ def login():
         if user==0:
             session['email'] = email
             session['password'] = password
+            session['publickey'] = get_public_key(email)
             session['redirected'] = True
-            return redirect(url_for('authentication.login_2fa'))
+            return redirect(url_for('authentication.login_2fa_sound'))
         elif user:
             login_user(user, remember=True)
             return redirect(url_for('views.home', code=303))
@@ -27,8 +30,10 @@ def login():
     else:
         return render_template('login.html', user=current_user)
 
-@authentication.route('/login/2fa', methods=['GET', 'POST'])
-def login_2fa(email=None, password=None, redirected=None):
+
+
+@authentication.route('/login/2fasound', methods=['GET', 'POST'])
+def login_2fa_sound(email=None, password=None, redirected=None):
     if current_user.is_authenticated:
         return redirect(url_for('views.home'))
 
@@ -61,7 +66,50 @@ def login_2fa(email=None, password=None, redirected=None):
             session['redirected'] = True
             return render_template('twofa_login.html', user=current_user, message=error_message)
     else:
-        return render_template('twofa_login.html', user=current_user)
+        return render_template('twofa_sound.html', user=current_user, pubic_key=get_public_key(email))
+
+@authentication.route('/login/2fasound/<token>', methods=['GET', 'POST'])
+def verificationpolling(token):
+
+
+
+
+#leaving for testing in case, will be removed
+#@authentication.route('/login/2fa', methods=['GET', 'POST'])
+#def login_2fa(email=None, password=None, redirected=None):
+#    if current_user.is_authenticated:
+#        return redirect(url_for('views.home'))
+
+#    try:
+#        email=copy.deepcopy(session['email'])
+#        password=copy.deepcopy(session['password'])
+#        redirected=copy.deepcopy(session['redirected'])
+#    except:
+#        return redirect(url_for('views.home'))
+
+#    if redirected==True:
+#        session['redirected']=False
+#    else:
+#        session.pop('email')
+#        session.pop('password')
+#        session.pop('redirected')
+#        if request.method == 'GET':
+#            return redirect(url_for('views.home'))
+
+#    if request.method == 'POST':
+#        totp = request.form.get('totp_code')
+#        user, error_message = login_account(email, password, totp)
+
+#        if user:
+#            login_user(user, remember=True)
+#            return redirect(url_for('views.home', code=303))
+#        else:
+#            session['email'] = email
+#            session['password'] = password
+#            session['redirected'] = True
+#            return render_template('twofa_login.html', user=current_user, message=error_message)
+#    else:
+#        return render_template('twofa_login.html', user=current_user)
 
 
 @authentication.route('/logout')
