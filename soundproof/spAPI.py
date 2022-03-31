@@ -15,7 +15,8 @@ def servertime():
 def uploadaudio():
     if request.method == 'POST':
         recording_data = json.loads(request.data)
-        file=datetime.now().strftime("%d%m%Y%H%M%S")
+        email = request.headers.get('email')
+        file=email+datetime.now().strftime("%d%m%Y%H%M%S")+"_web"
         with open(f'soundproof/audio/recordings/{file}.json', 'w') as destination:
             json.dump(recording_data, destination)
         return ('', 204) 

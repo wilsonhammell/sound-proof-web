@@ -18,7 +18,6 @@ def login():
         if user==0:
             session['email'] = email
             session['password'] = password
-            session['publickey'] = get_public_key(email)
             session['redirected'] = True
             return redirect(url_for('authentication.login_2fa_sound'))
         elif user:
@@ -65,7 +64,7 @@ def login_2fa_sound(email=None, password=None, redirected=None):
             session['redirected'] = True
             return render_template('twofa_login.html', user=current_user, message=error_message)
     else:
-        return render_template('twofa_sound.html', user=current_user, pubic_key=get_public_key(email))
+        return render_template('twofa_sound.html', user=current_user, pubic_key=get_public_key(email), email=email)
 
 @authentication.route('/login/2fasound/<token>', methods=['GET', 'POST'])
 def verificationpolling(token):
