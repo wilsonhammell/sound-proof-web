@@ -126,6 +126,10 @@
                     },
                     method: 'POST',
                     body: JSON.stringify(recordingData)
+                }).then(function (response) {
+                    return response.text().then(function (text) {
+                        window.location.href = text;
+                    });
                 });
             }
             reader.readAsDataURL(blob);

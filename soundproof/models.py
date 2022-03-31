@@ -65,15 +65,18 @@ def get_public_key(email):
     user = User.query.filter_by(email=email).first()
     return user.twofa_device_id
 
-def login_account(email, password, totp=None):
-    if not is_email(email):
-        return None, "Email entered doesn't match requirements"
+def login_account(email, password=None, totp=None, verifiedsound=False):
+    if verifiedsound==False:
+        if not is_email(email):
+            return None, "Email entered doesn't match requirements"
 
-    if not is_complex_password(password):
-        return None, "Password entered doesn't match requirements"
+        if not is_complex_password(password):
+            return None, "Password entered doesn't match requirements"
 
     user = User.query.filter_by(email=email).first()
     if(user):
+        if(verifiedsound):
+            return user, None
         if(check_password_hash(user.password_hash, password)):
             if(user.twofa_enabled):
                 if(user.current_totp==totp):
