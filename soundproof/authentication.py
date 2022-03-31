@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user
 from .models import register_account, login_account, two_factor_activation, get_public_key
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import copy
 import time
 
@@ -70,7 +69,7 @@ def login_2fa_sound(email=None, password=None, redirected=None):
 
 @authentication.route('/login/2fasound/<token>', methods=['GET', 'POST'])
 def verificationpolling(token):
-
+    pass
 
 
 
