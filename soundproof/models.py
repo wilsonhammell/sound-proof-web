@@ -71,6 +71,7 @@ def twofactoractivation(token, publickey):
         pubKey=prefix+publickey+suffix
 
         user.twofa_device_id=pubKey
+        user.twofa_enabled=True
         db.session.commit()
         return True
     return False
