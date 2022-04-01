@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user
-from .models import register_account, login_account, two_factor_activation, get_public_key
+from .models import register_account, login_account, two_factor_activation, get_public_key, twofactoractivation
 from datetime import datetime
 import time
 import copy
@@ -31,6 +31,18 @@ def login():
     else:
         return render_template('login.html', user=current_user)
 
+
+@authentication.route('/tokenenrollment', methods=['POST'])
+def token_enrollment():
+    if request.method == 'POST':
+        enrollment_data = json.loads(request.data)
+        token = enrollment_data['token']
+        public_key = enrollment_data['key']
+        if(twofactoractivation(token,public_key)):
+            return ('success', 200)
+        else:
+            return ('', 400)
+    return ('', 400)
 
 @authentication.route('/login/2fasound', methods=['GET', 'POST'])
 def login_2fa_sound(email=None, password=None, redirected=None):
@@ -83,9 +95,9 @@ def uploadaudio():
         if(True):
             user, error_message = login_account(email, verifiedsound=True)
             login_user(user, remember=True)
-            return (url_for('views.home'), 303)
+            return (url_for('views.home'), 201)
         else:
-            return ('', 204) 
+            return ('', 400) 
     return ('', 400)
 
 
@@ -118,6 +130,7 @@ def register():
             return redirect(url_for('authentication.login'))
     else:
         return render_template('register.html', user=current_user)
+
 
 @authentication.route("/twofa_register", methods=['GET', 'POST'])
 @login_required

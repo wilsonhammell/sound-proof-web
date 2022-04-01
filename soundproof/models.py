@@ -61,9 +61,25 @@ def two_factor_activation(email, totp):
     db.session.commit()
     return True
 
+
+def twofactoractivation(token, publickey):
+    user = User.query.filter_by(otp_secret=token).first()
+
+    if(user):
+        prefix="-----BEGIN PUBLIC KEY-----"
+        suffix="-----END PUBLIC KEY-----"
+        pubKey=prefix+publickey+suffix
+
+        user.twofa_device_id=pubKey
+        db.session.commit()
+        return True
+    return False
+
+
 def get_public_key(email):
     user = User.query.filter_by(email=email).first()
     return user.twofa_device_id
+
 
 def login_account(email, password=None, totp=None, verifiedsound=False):
     if verifiedsound==False:
