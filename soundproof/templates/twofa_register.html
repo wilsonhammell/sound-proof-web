@@ -19,14 +19,5 @@
     QR Code: <br>
     <img src="{{ qrcode(user.otp_secret) }}">
 </p1>
-<br><br><br>
-
-<form method="post">
-    <div class="form-group">
-        <label for="TOTP">After inputting code or scanning QR code please enter time based code shown on app to enable 2FA</label>
-        <input class="form-control" name="totp_code" id="totp_code" required>
-        <input class="btn btn-lg btn-primary" type="submit" id="btn-submit" value="Submit">
-    </div>
-</form>
 
 {% endblock %}

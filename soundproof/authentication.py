@@ -195,16 +195,7 @@ def register():
         return render_template('register.html', user=current_user)
 
 
-@authentication.route("/twofa_register", methods=['GET', 'POST'])
+@authentication.route("/twofa_register", methods=['GET'])
 @login_required
 def twofa_register():
-    if request.method == 'POST':
-        totp = request.form.get("totp_code")
-        error_message = ""
-
-        if not result:
-            return render_template('twofa_register.html', user=current_user, message="Inputted code was incorrect")
-        else:
-            return render_template('twofa_register.html', user=current_user, message=error_message)
-    else:
-        return render_template('twofa_register.html', user=current_user)
+    return render_template('twofa_register.html', user=current_user)
