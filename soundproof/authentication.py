@@ -199,10 +199,3 @@ def register():
 @login_required
 def twofa_register():
     return render_template('twofa_register.html', user=current_user)
-
-@authentication.before_request
-def before_request():
-    if not request.is_secure:
-        url = request.url.replace('http://', 'https://', 1)
-        code = 301
-        return redirect(url, code=code)
