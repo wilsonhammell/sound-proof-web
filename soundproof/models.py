@@ -16,6 +16,7 @@ class User(db.Model, UserMixin):
     otp_secret = db.Column(db.String(32))
     twofa_device_id= db.Column(db.String(512), default='')
     twofa_enabled = db.Column(db.Boolean, default=False)
+    twofa_recording = db.Column(db.Boolean, default=True) #change this back to false
     current_totp = db.Column(db.String(6), default='645852')
 
     def __repr__(self):
@@ -53,15 +54,7 @@ def register_account(name, email, password):
     return True, None
 
 
-#needs big adjustments, just here for testing
-def two_factor_activation(email, totp):
-    user = User.query.filter_by(email=email).first()
-    user.twofa_enabled = not user.twofa_enabled
-    user.twofa_device_id = "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq1tJbelqOaFTmW+hhgMXFnZSrHEaGbGa4IkPpRHDuO4ntRn3yheP2NzExdaad1Jx3NTI9n7PnxU4S4KM+1nAjW0tjnI1BpcXS+KWQwrXy/Sw64cb2x+9N3r4tkveg8c8cetADTSHNj8Tn+7y8d9HDZG16efOrnDNv5TrzAdBZ5AWN+hIOUkm8prBAShbnPu+aS2wp9PQQeSVjRmEU12oAkLRiMtHGHGn0azLUS+LvvwbvaVPnRBVAdtxjvlORM0B8wr+FgxYq5tOIK8yZfBGMkG6mK2LC13C3Vq5oyIy7Kip4oqoumvKjbkYqYio1IO2DgGr7SVPRL9SiDKm9cmebQIDAQAB-----END PUBLIC KEY-----"
-    db.session.commit()
-    return True
-
-
+#needs adjustments, just here for testing
 def twofactoractivation(token, publickey):
     user = User.query.filter_by(otp_secret=token).first()
 
@@ -76,10 +69,39 @@ def twofactoractivation(token, publickey):
         return True
     return False
 
+#could consolidate these into a toggle, maybe this provides more control tho?
+def user_recording(email):
+    user = User.query.filter_by(email=email).first()
+
+    if(user):
+        user.twofa_recording = True
+        return True
+    return False
+
+def user_recording_done(email):
+    user = User.query.filter_by(email=email).first()
+
+    if(user):
+        user.twofa_recording = False
+        return True
+    return False
+
+#rather than using the public key some other token maybe
+def is_user_recording(publickey):
+    user = User.query.filter_by(twofa_device_id=publickey).first()
+    if(user):
+        return user.twofa_recording
+    return False
 
 def get_public_key(email):
     user = User.query.filter_by(email=email).first()
     return user.twofa_device_id
+
+def get_user_email(publickey):
+    user = User.query.filter_by(twofa_device_id=publickey).first()
+    return user.email
+
+
 
 
 def login_account(email, password=None, totp=None, verifiedsound=False):

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user
-from .models import register_account, login_account, two_factor_activation, get_public_key, twofactoractivation
+from .models import register_account, login_account, two_factor_activation, get_public_key, twofactoractivation, is_user_recording, user_recording, user_recording_done, get_user_email
 from datetime import datetime
 import time
 import copy
@@ -76,10 +76,62 @@ def login_2fa_sound(email=None, password=None, redirected=None):
             session['email'] = email
             session['password'] = password
             session['redirected'] = True
-            return render_template('twofa_login.html', user=current_user, message=error_message)
+            #maybe send a request from the browser just prior to recording, this is probably fine tho
+            user_recording(email)
+            return render_template('twofa_sound.html', user=current_user, message=error_message)
     else:
+        user_recording(email)
         return render_template('twofa_sound.html', user=current_user, pubic_key=get_public_key(email), email=email)
 
+
+#phone app calls this regularly, will get a response saying either to record or not, times out every 20 seconds
+#if the account with given pub key says recording, return response to phone informing them to start recording
+@authentication.route('/login/2farecordpolling', methods=['GET'])
+def login_2fa_polling():
+    if current_user.is_authenticated:
+        return
+    
+    data = json.loads(request.data)
+    key = enrollment_data['key']
+
+    polling_end = time.time() + 20
+    while(time.time()<polling_end):
+        if(userIsRecording(key)):
+            return('record',200)
+    return('', 204)
+
+
+#long poll this function from app with pub key
+#retrieves the recording for the given user, if it exists and if its recently recorded
+#maybe set recording to false from here rather than in the uploadaudio function, will see 
+@authentication.route('/login/2farecordingdata', method=['GET'])
+def login_2fa_data():
+    if current_user.is_authenticated:
+        return
+
+    data = json.loads(request.data)
+    key = enrollment_data['key']
+
+    email = get_get_user_email(key)
+    path=f'soundproof/audio/recordings/{email}.json'
+    if(os.path.isfile(path)):
+        polling_end = time.time() + 20
+        while(time.time()<polling_end):
+            if(is_recent(path)):
+                return send_file(path)
+    return('', 503) 
+
+def is_recent(path):
+    if(abs(os.path.getmtime(path)-time.time())<=3):
+        return True
+    return True#change this back
+
+#possibly terrible
+#it just verifies the account for login on the server, no login session token, needs adjustments
+@authentication.route('/login/2faresponse', methods=['POST'])
+def login_2fa_response():
+    if current_user.is_authenticated:
+        return
 
 #not finished, needs to recieve response from phone
 @authentication.route("/uploadaudio", methods=['POST'])
@@ -87,9 +139,13 @@ def uploadaudio():
     if request.method == 'POST':
         recording_data = json.loads(request.data)
         email = request.headers.get('email')
-        file=email+datetime.now().strftime("%d%m%Y%H%M%S")+"_web"
+        file=email
         with open(f'soundproof/audio/recordings/{file}.json', 'w') as destination:
             json.dump(recording_data, destination)
+        
+        print("sleeping, instead of just sleeping should be waiting on verification from phone", flush=True)
+        time.sleep(20)
+        user_recording_done(email)
 
         #if we get a true response from the phone do this
         if(True):
