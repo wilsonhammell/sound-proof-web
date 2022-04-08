@@ -16,8 +16,9 @@ class User(db.Model, UserMixin):
     otp_secret = db.Column(db.String(32))
     twofa_device_id= db.Column(db.String(512), default='')
     twofa_enabled = db.Column(db.Boolean, default=False)
-    twofa_recording = db.Column(db.Boolean, default=True) #change this back to false
-    current_totp = db.Column(db.String(6), default='645852')
+    twofa_soundverified = db.Column(db.Boolean, default=False)
+    twofa_recording = db.Column(db.Boolean, default=False) #change this back to false
+    current_totp = db.Column(db.String(6), default='645852') #eventually randomly generate with token and time
 
     def __repr__(self):
         return '<User %r>' % self.email
@@ -75,6 +76,7 @@ def user_recording(email):
 
     if(user):
         user.twofa_recording = True
+        db.session.commit()
         return True
     return False
 
@@ -83,8 +85,24 @@ def user_recording_done(email):
 
     if(user):
         user.twofa_recording = False
+        db.session.commit()
         return True
     return False
+
+def sound_isverified(email):
+    user = User.query.filter_by(email=email).first();
+    return user.twofa_soundverified
+
+def sound_verified(publickey):
+    user = User.query.filter_by(twofa_device_id=publickey).first()
+    user.twofa_soundverified = True
+    db.session.commit()
+
+def sound_verified_reset(email):
+    user = User.query.filter_by(email=email).first();
+    user.twofa_soundverified = False
+    db.session.commit()
+
 
 #rather than using the public key some other token maybe
 def is_user_recording(publickey):

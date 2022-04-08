@@ -120,7 +120,7 @@
                 recordingData["key"] = encrypedAESKey;
                 recordingData["iv"] = iv;
                 recordingData["b64audio"] = encrypted;
-                fetch('/uploadaudio', {
+                fetch('/uploadaudio', { 
                     headers: {
                         'email': email
                     },

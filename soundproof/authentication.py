@@ -22,6 +22,7 @@ def login():
             session['email'] = email
             session['password'] = password
             session['redirected'] = True
+            user_recording(email)
             return redirect(url_for('authentication.login_2fa_sound'))
         elif user:
             login_user(user, remember=True)
@@ -92,11 +93,11 @@ def login_2fa_polling():
         return
     
     data = json.loads(request.data)
-    key = enrollment_data['key']
+    key = data['key']
 
     polling_end = time.time() + 20
     while(time.time()<polling_end):
-        if(userIsRecording(key)):
+        if(is_user_recording(key)):
             return('record',200)
     return('', 204)
 
@@ -110,9 +111,9 @@ def login_2fa_data():
         return
 
     data = json.loads(request.data)
-    key = enrollment_data['key']
+    key = data['key']
 
-    email = get_get_user_email(key)
+    email = get_user_email(key)
     path=f'soundproof/audio/recordings/{email}.json'
     if(os.path.isfile(path)):
         polling_end = time.time() + 20
@@ -124,7 +125,7 @@ def login_2fa_data():
 def is_recent(path):
     if(abs(os.path.getmtime(path)-time.time())<=3):
         return True
-    return True#change this back
+    return False#change this back
 
 #possibly terrible
 #it just verifies the account for login on the server, no login session token, needs adjustments
@@ -132,6 +133,14 @@ def is_recent(path):
 def login_2fa_response():
     if current_user.is_authenticated:
         return
+
+    data = json.loads(request.data)
+    valid = data['valid']
+    key = data['key']
+
+    if(valid=="true"):
+        sound_verified(key)
+    return('',200)
 
 #not finished, needs to recieve response from phone
 @authentication.route("/uploadaudio", methods=['POST'])
@@ -143,17 +152,15 @@ def uploadaudio():
         with open(f'soundproof/audio/recordings/{file}.json', 'w') as destination:
             json.dump(recording_data, destination)
         
-        print("sleeping, instead of just sleeping should be waiting on verification from phone", flush=True)
-        time.sleep(20)
         user_recording_done(email)
-
-        #if we get a true response from the phone do this
-        if(True):
-            user, error_message = login_account(email, verifiedsound=True)
-            login_user(user, remember=True)
-            return (url_for('views.home'), 201)
-        else:
-            return ('', 400) 
+        polling_end = time.time() + 20
+        while(time.time()<polling_end):
+            if(sound_isverified(email)):
+                user, error_message = login_account(email, verifiedsound=True)
+                login_user(user, remember=True)
+                sound_verified_reset(email)
+                return (url_for('views.home'), 201)
+        return ('', 400) 
     return ('', 400)
 
 
