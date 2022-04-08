@@ -105,7 +105,7 @@ def login_2fa_polling():
 #long poll this function from app with pub key
 #retrieves the recording for the given user, if it exists and if its recently recorded
 #maybe set recording to false from here rather than in the uploadaudio function, will see 
-@authentication.route('/login/2farecordingdata', method=['GET'])
+@authentication.route('/login/2farecordingdata', methods=['GET'])
 def login_2fa_data():
     if current_user.is_authenticated:
         return
