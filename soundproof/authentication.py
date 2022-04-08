@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user
-from .models import register_account, login_account, two_factor_activation, get_public_key, twofactoractivation, is_user_recording, user_recording, user_recording_done, get_user_email
+from .models import register_account, login_account, get_public_key, twofactoractivation, is_user_recording, user_recording, user_recording_done, get_user_email
 from datetime import datetime
 import time
 import copy
@@ -201,8 +201,6 @@ def twofa_register():
     if request.method == 'POST':
         totp = request.form.get("totp_code")
         error_message = ""
-
-        result = two_factor_activation(email=current_user.email, totp=totp)
 
         if not result:
             return render_template('twofa_register.html', user=current_user, message="Inputted code was incorrect")
