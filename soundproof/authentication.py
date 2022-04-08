@@ -30,7 +30,7 @@ def login():
         else:
             return render_template('login.html', user=current_user, message=error_message)
     else:
-        return render_template('login.html', user=current_user)
+        return render_template('login.html', user=current_user, _external=True, _scheme = 'https')
 
 
 @authentication.route('/tokenenrollment', methods=['POST'])
