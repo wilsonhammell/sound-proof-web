@@ -12,7 +12,7 @@ authentication = Blueprint('authentication', __name__)
 @authentication.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('views.home'))
+        return redirect(url_for('views.home', _scheme = 'https'))
 
     if request.method == 'POST':
         email = request.form.get('email')
@@ -23,10 +23,10 @@ def login():
             session['password'] = password
             session['redirected'] = True
             user_recording(email)
-            return redirect(url_for('authentication.login_2fa_sound'))
+            return redirect(url_for('authentication.login_2fa_sound', _scheme = 'https'))
         elif user:
             login_user(user, remember=True)
-            return redirect(url_for('views.home', code=303))
+            return redirect(url_for('views.home', code=303, _scheme = 'https'))
         else:
             return render_template('login.html', user=current_user, message=error_message)
     else:
@@ -48,14 +48,14 @@ def token_enrollment():
 @authentication.route('/login/2fasound', methods=['GET', 'POST'])
 def login_2fa_sound(email=None, password=None, redirected=None):
     if current_user.is_authenticated:
-        return redirect(url_for('views.home'))
+        return redirect(url_for('views.home', _scheme = 'https'))
 
     try:
         email=copy.deepcopy(session['email'])
         password=copy.deepcopy(session['password'])
         redirected=copy.deepcopy(session['redirected'])
     except:
-        return redirect(url_for('views.home'))
+        return redirect(url_for('views.home', _scheme = 'https'))
 
     if redirected==True:
         session['redirected']=False
@@ -64,7 +64,7 @@ def login_2fa_sound(email=None, password=None, redirected=None):
         session.pop('password')
         session.pop('redirected')
         if request.method == 'GET':
-            return redirect(url_for('views.home'))
+            return redirect(url_for('views.home', _scheme = 'https'))
 
     if request.method == 'POST':
         totp = request.form.get('totp_code')
@@ -72,7 +72,7 @@ def login_2fa_sound(email=None, password=None, redirected=None):
 
         if user:
             login_user(user, remember=True)
-            return redirect(url_for('views.home', code=303))
+            return redirect(url_for('views.home', code=303, _scheme = 'https'))
         else:
             session['email'] = email
             session['password'] = password
@@ -159,7 +159,7 @@ def uploadaudio():
                 user, error_message = login_account(email, verifiedsound=True)
                 login_user(user, remember=True)
                 sound_verified_reset(email)
-                return (url_for('views.home'), 201)
+                return (url_for('views.home', _scheme = 'https'), 201)
         return ('', 400) 
     return ('', 400)
 
@@ -168,13 +168,13 @@ def uploadaudio():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('authentication.login'))
+    return redirect(url_for('authentication.login', _scheme = 'https'))
 
 
 @authentication.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('views.home'))
+        return redirect(url_for('views.home', _scheme = 'https'))
 
     if request.method == 'POST':
         username = request.form.get('username')
@@ -190,7 +190,7 @@ def register():
         if error_message:
             return render_template('register.html', user=current_user, message=error_message)
         else:
-            return redirect(url_for('authentication.login'))
+            return redirect(url_for('authentication.login', _scheme = 'https'))
     else:
         return render_template('register.html', user=current_user)
 

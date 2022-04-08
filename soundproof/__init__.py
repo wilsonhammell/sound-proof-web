@@ -11,6 +11,7 @@ def launch_website():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'dzk4NDFlZ2U0cmg5NjRlOTY4NGc5NjhKS2V3OGRyZnBuMnRydSt6ZGY0eTIrc3R5K2oyeTc4Mmo0WGIrdDR5dWorc3I0dDErajc0c0hKdCs0MXJldGErODk0MzJldzRjKzFhMmV3Njc4YTI='
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    app.config['PREFERRED_URL_SCHEME'] = 'https'
     db.init_app(app)
 
     from .views import views
