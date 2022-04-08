@@ -27,10 +27,13 @@ def launch_website():
         db.create_all(app=app)
 
     login_manager = LoginManager()
-    login_manager.login_view = 'authentication.login'
     login_manager.init_app(app)
 
     QRcode(app)
+
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        return redirect(url_for('authentication.login', _external=True, _scheme = 'https'))
 
     @login_manager.user_loader
     def load_user(id):
