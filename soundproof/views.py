@@ -9,7 +9,7 @@ views = Blueprint('views', __name__)
 def home():
      return render_template('home.html', user=current_user)
 
-@app.before_request
+@views.before_request
 def before_request():
     if not request.is_secure:
         url = request.url.replace('http://', 'https://', 1)
