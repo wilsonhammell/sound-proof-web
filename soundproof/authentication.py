@@ -99,6 +99,7 @@ def login_2fa_polling():
     while(time.time()<polling_end):
         if(is_user_recording(key)):
             return('record',200)
+        time.sleep(1)
     return('', 204)
 
 
@@ -120,6 +121,7 @@ def login_2fa_data():
         while(time.time()<polling_end):
             if(is_recent(path)):
                 return send_file(path)
+            time.sleep(1)
     return('', 503) 
 
 def is_recent(path):
@@ -160,6 +162,7 @@ def uploadaudio():
                 login_user(user, remember=True)
                 sound_verified_reset(email)
                 return (url_for('views.home', _external=True, _scheme = 'https'), 201)
+            time.sleep(1)
         return ('', 400) 
     return ('', 400)
 
