@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user
 from .models import register_account, login_account, get_public_key, twofactoractivation, is_user_recording, user_recording, user_recording_done, get_user_email, sound_isverified, sound_verified, sound_verified_reset
 from datetime import datetime
@@ -104,7 +104,7 @@ def login_2fa_polling():
         while(time.time()<polling_end):
             if(is_user_recording(key)):
                 print("the user was recording")
-                return(jsonify('record'),200)
+                return('record',200)
             print("the user aint recording")
             time.sleep(1)
         return('', 204)
