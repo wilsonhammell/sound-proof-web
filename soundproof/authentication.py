@@ -109,28 +109,30 @@ def login_2fa_polling():
 #long poll this function from app with pub key
 #retrieves the recording for the given user, if it exists and if its recently recorded
 #maybe set recording to false from here rather than in the uploadaudio function, will see 
-@authentication.route('/login/2farecordingdata', methods=['GET'])
+@authentication.route('/login/2farecordingdata', methods=['POST'])
 def login_2fa_data():
     if current_user.is_authenticated:
         return
 
-    data = json.loads(request.data)
-    key = data['key']
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        key = data['key']
 
-    email = get_user_email(key)
-    path=f'soundproof/audio/recordings/{email}.json'
-    if(os.path.isfile(path)):
-        polling_end = time.time() + 20
-        while(time.time()<polling_end):
-            if(is_recent(path)):
-                return send_file(path)
-            time.sleep(1)
-    return('', 503) 
+        email = get_user_email(key)
+        path=f'soundproof/audio/recordings/{email}.json'
+        if(os.path.isfile(path)):
+            polling_end = time.time() + 20
+            while(time.time()<polling_end):
+                if(is_recent(path)):
+                    return send_file(path), 200
+                time.sleep(1)
+        return('', 503) 
+    return('', 417)
 
 def is_recent(path):
-    if(abs(os.path.getmtime(path)-time.time())<=3):
+    if(abs(os.path.getmtime(path)-time.time())<=1000):#change this back
         return True
-    return False#change this back
+    return False
 
 #possibly terrible
 #it just verifies the account for login on the server, no login session token, needs adjustments
