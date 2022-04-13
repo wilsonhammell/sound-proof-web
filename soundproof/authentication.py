@@ -93,14 +93,16 @@ def login_2fa_polling():
     if current_user.is_authenticated:
         return
     
-    data = json.loads(request.data)
-    key = data['key']
+    args = request.args
+    key = args.get('key')
 
-    polling_end = time.time() + 20
-    while(time.time()<polling_end):
-        if(is_user_recording(key)):
-            return('record',200)
-        time.sleep(1)
+    if key is not None:
+        polling_end = time.time() + 20
+        while(time.time()<polling_end):
+            if(is_user_recording(key)):
+                return('record',200)
+            time.sleep(1)
+        return('', 204)
     return('', 204)
 
 
