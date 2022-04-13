@@ -94,7 +94,7 @@
         mediaRecorder.addEventListener('dataavailable', function (event) {
             chunks.push(event.data);
         });
-
+        console.log("step 5");
         mediaRecorder.addEventListener('stop', function () {
             var blob = new Blob(chunks, { type: 'audio/wav' });
 
