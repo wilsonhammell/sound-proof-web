@@ -40,7 +40,6 @@ def token_enrollment():
         token = enrollment_data['token']
         public_key = enrollment_data['key']
         if(twofactoractivation(token,public_key)):
-            print(repr(public_key), flush=True)
             return ('success', 200)
         else:
             return ('', 400)
