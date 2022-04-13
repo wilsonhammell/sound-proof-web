@@ -97,7 +97,7 @@ def login_2fa_polling():
         enrollment_data = json.loads(request.data)
         key = enrollment_data['key']
 
-        polling_end = time.time() + 20
+        polling_end = time.time() + 25
         while(time.time()<polling_end):
             if(is_user_recording(key)):
                 return('record',200)
