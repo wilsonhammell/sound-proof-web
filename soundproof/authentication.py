@@ -88,7 +88,7 @@ def login_2fa_sound(email=None, password=None, redirected=None):
 
 #phone app calls this regularly, will get a response saying either to record or not, times out every 20 seconds
 #if the account with given pub key says recording, return response to phone informing them to start recording
-@authentication.route('/login/2farecordpolling', methods=['GET'])
+@authentication.route('/login/2farecordpolling', methods=['POST'])
 def login_2fa_polling():
     if current_user.is_authenticated:
         return
