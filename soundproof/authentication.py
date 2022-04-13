@@ -95,7 +95,10 @@ def login_2fa_polling():
 
     if request.method == 'POST':
         enrollment_data = json.loads(request.data)
-        public_key = enrollment_data['key']
+        key = enrollment_data['key']
+
+        print("the key is", key, flush=True)
+        print("the key should be", get_public_key("test@test.ca"), flush=True)
 
         polling_end = time.time() + 20
         while(time.time()<polling_end):
