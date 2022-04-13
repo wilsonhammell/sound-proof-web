@@ -71,19 +71,15 @@
 <script type="text/javascript" src="{{ url_for('static', filename="bower_components/crypto-js/crypto-js.js") }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename="bower_components/jsrsasign-all-min.js") }}"></script>
 <script>
-    console.log("step 1");
     var notifCircle = document.getElementById("notificationcircle");
     var notifText = document.getElementById("notifdiv");
 
     var pubKey = "{{ pubic_key }}";
     var email = "{{ email }}";
-    console.log("step 2");
     var constraints = { audio: true };
     var recordingTime;
 
-    console.log("step 3");
     navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-        console.log("step 4");
         var mediaRecorder = new MediaRecorder(stream);
         var chunks = [];
 
@@ -94,7 +90,6 @@
         mediaRecorder.addEventListener('dataavailable', function (event) {
             chunks.push(event.data);
         });
-        console.log("step 5");
         mediaRecorder.addEventListener('stop', function () {
             var blob = new Blob(chunks, { type: 'audio/wav' });
 
