@@ -103,7 +103,7 @@ def sound_verified(publickey):
     return False
 
 def sound_verified_reset(email):
-    user = User.query.filter_by(twofa_device_id=publickey).first()
+    user = User.query.filter_by(email=email).first()
 
     if(user):
         user.twofa_soundverified = False
