@@ -132,6 +132,7 @@ def login_2fa_data():
     return('', 417)
 
 def is_recent(path):
+    print("the file was made at", os.path.getmtime(path), flush=True)
     if(abs(os.path.getmtime(path)-time.time())<=1000):#change this back
         return True
     return False
