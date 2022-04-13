@@ -95,13 +95,21 @@ def sound_isverified(email):
 
 def sound_verified(publickey):
     user = User.query.filter_by(twofa_device_id=publickey).first()
-    user.twofa_soundverified = True
-    db.session.commit()
+
+    if(user):
+        user.twofa_soundverified = True
+        db.session.commit()
+        return True
+    return False
 
 def sound_verified_reset(email):
-    user = User.query.filter_by(email=email).first();
-    user.twofa_soundverified = False
-    db.session.commit()
+    user = User.query.filter_by(twofa_device_id=publickey).first()
+
+    if(user):
+        user.twofa_soundverified = False
+        db.session.commit()
+        return True
+    return False
 
 
 #rather than using the public key some other token maybe
