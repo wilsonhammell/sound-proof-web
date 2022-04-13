@@ -145,8 +145,9 @@ def login_2fa_response():
         key = data['key']
 
         if(valid=="true"):
-            sound_verified(key)
-        return('',200)
+            if(sound_verified(key)):
+                return('',200)
+            return('', 204)
     return('', 417)
 
 #not finished, needs to recieve response from phone
