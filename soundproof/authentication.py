@@ -88,17 +88,15 @@ def login_2fa_sound(email=None, password=None, redirected=None):
 
 #phone app calls this regularly, will get a response saying either to record or not, times out every 20 seconds
 #if the account with given pub key says recording, return response to phone informing them to start recording
-@authentication.route('/login/2farecordpolling', methods=['GET'])
+@authentication.route('/login/2farecordpolling', methods=['POST'])
 def login_2fa_polling():
     if current_user.is_authenticated:
         return
-    
-    args = request.args
-    key = args.get('key')
-    print("The key arguement is:", key, flush=True)
-    print("the key should be", get_public_key("test@test.ca"), flush=True)
 
-    if key is not None:
+    if request.method == 'POST':
+        enrollment_data = json.loads(request.data)
+        public_key = enrollment_data['key']
+
         polling_end = time.time() + 20
         while(time.time()<polling_end):
             if(is_user_recording(key)):
@@ -106,7 +104,7 @@ def login_2fa_polling():
             print("the user aint recording")
             time.sleep(1)
         return('', 204)
-    return('', 204)
+    return('', 417)
 
 
 #long poll this function from app with pub key
