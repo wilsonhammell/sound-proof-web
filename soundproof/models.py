@@ -75,9 +75,11 @@ def user_recording(email):
     user = User.query.filter_by(email=email).first()
 
     if(user):
+        print("setting", user.email, "to record", flush=True)
         user.twofa_recording = True
         db.session.commit()
         return True
+    print("did not find the user", flush=True)
     return False
 
 def user_recording_done(email):
@@ -116,7 +118,9 @@ def sound_verified_reset(email):
 def is_user_recording(publickey):
     user = User.query.filter_by(twofa_device_id=publickey).first()
     if(user):
+        print("found a user their status is", user.twofa_recording, user.email, flush=True)
         return user.twofa_recording
+    print("did not find a user with the given key", flush=True)
     return False
 
 def get_public_key(email):

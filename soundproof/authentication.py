@@ -96,6 +96,8 @@ def login_2fa_polling():
         enrollment_data = json.loads(request.data)
         key = enrollment_data['key']
 
+        print("the key is", key, flush=True)
+
         polling_end = time.time() + 25
         while(time.time()<polling_end):
             if(is_user_recording(key)):
@@ -120,6 +122,7 @@ def login_2fa_data():
         email = get_user_email(key)
         path=f'soundproof/audio/recordings/{email}.json'
         path2=f'audio/recordings/{email}.json'
+        print("does that path exist?", os.path.isfile(path))
         if(os.path.isfile(path)):
             polling_end = time.time() + 20
             while(time.time()<polling_end):
