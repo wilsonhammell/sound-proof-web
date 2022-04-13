@@ -97,15 +97,10 @@ def login_2fa_polling():
         enrollment_data = json.loads(request.data)
         key = enrollment_data['key']
 
-        print("the key is", key, flush=True)
-        print("the key should be", get_public_key("test@test.ca"), flush=True)
-
         polling_end = time.time() + 20
         while(time.time()<polling_end):
             if(is_user_recording(key)):
-                print("the user was recording")
                 return('record',200)
-            print("the user aint recording")
             time.sleep(1)
         return('', 204)
     return('', 417)
@@ -144,13 +139,15 @@ def login_2fa_response():
     if current_user.is_authenticated:
         return
 
-    data = json.loads(request.data)
-    valid = data['valid']
-    key = data['key']
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        valid = data['valid']
+        key = data['key']
 
-    if(valid=="true"):
-        sound_verified(key)
-    return('',200)
+        if(valid=="true"):
+            sound_verified(key)
+        return('',200)
+    return('', 417)
 
 #not finished, needs to recieve response from phone
 @authentication.route("/uploadaudio", methods=['POST'])
