@@ -95,6 +95,7 @@ def login_2fa_polling():
     
     args = request.args
     key = args.get('key')
+    print(key, flush=True)
 
     if key is not None:
         polling_end = time.time() + 20
