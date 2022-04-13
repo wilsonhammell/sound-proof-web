@@ -95,13 +95,15 @@ def login_2fa_polling():
     
     args = request.args
     key = args.get('key')
-    print(key, flush=True)
+    print("The key arguement is:", key, flush=True)
+    print("the key should be", get_public_key("test@test.ca"), flush=True)
 
     if key is not None:
         polling_end = time.time() + 20
         while(time.time()<polling_end):
             if(is_user_recording(key)):
                 return('record',200)
+            print("the user aint recording")
             time.sleep(1)
         return('', 204)
     return('', 204)
