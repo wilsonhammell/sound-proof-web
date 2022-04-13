@@ -120,11 +120,12 @@ def login_2fa_data():
 
         email = get_user_email(key)
         path=f'soundproof/audio/recordings/{email}.json'
+        path2=f'audio/recordings/{email}.json'
         if(os.path.isfile(path)):
             polling_end = time.time() + 20
             while(time.time()<polling_end):
                 if(is_recent(path)):
-                    return send_file(path), 200
+                    return send_file(path2), 200
                 time.sleep(1)
             return('', 204) 
         return('', 503) 
