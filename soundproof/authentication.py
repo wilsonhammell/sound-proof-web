@@ -126,6 +126,7 @@ def login_2fa_data():
                 if(is_recent(path)):
                     return send_file(path), 200
                 time.sleep(1)
+            return('', 204) 
         return('', 503) 
     return('', 417)
 
