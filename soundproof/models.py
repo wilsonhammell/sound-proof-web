@@ -1,7 +1,7 @@
 from . import db
 from flask_login import UserMixin
 import re
-
+import json
 
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
@@ -118,9 +118,7 @@ def sound_verified_reset(email):
 def is_user_recording(publickey):
     user = User.query.filter_by(twofa_device_id=publickey).first()
     if(user):
-        print("found a user their status is", user.twofa_recording, user.email, flush=True)
         return user.twofa_recording
-    print("did not find a user with the given key", flush=True)
     return False
 
 def get_public_key(email):

@@ -118,6 +118,7 @@
                 recordingData["time"] = recordingTime;
                 recordingData["key"] = encrypedAESKey;
                 recordingData["iv"] = iv;
+                recordingData["prefix"] = prefix;
                 recordingData["b64audio"] = encrypted;
                 fetch('/uploadaudio', { 
                     headers: {

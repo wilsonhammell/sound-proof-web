@@ -77,7 +77,6 @@ def login_2fa_sound(email=None, password=None, redirected=None):
             session['email'] = email
             session['password'] = password
             session['redirected'] = True
-            #maybe send a request from the browser just prior to recording, this is probably fine tho
             user_recording(email)
             return render_template('twofa_sound.html', user=current_user, message=error_message)
     else:
@@ -85,8 +84,6 @@ def login_2fa_sound(email=None, password=None, redirected=None):
         return render_template('twofa_sound.html', user=current_user, pubic_key=get_public_key(email), email=email)
 
 
-#phone app calls this regularly, will get a response saying either to record or not, times out every 20 seconds
-#if the account with given pub key says recording, return response to phone informing them to start recording
 @authentication.route('/login/2farecordpolling', methods=['POST'])
 def login_2fa_polling():
     if current_user.is_authenticated:
@@ -105,9 +102,6 @@ def login_2fa_polling():
     return('', 417)
 
 
-#long poll this function from app with pub key
-#retrieves the recording for the given user, if it exists and if its recently recorded
-#maybe set recording to false from here rather than in the uploadaudio function, will see 
 @authentication.route('/login/2farecordingdata', methods=['POST'])
 def login_2fa_data():
     if current_user.is_authenticated:
@@ -131,8 +125,7 @@ def login_2fa_data():
     return('', 417)
 
 def is_recent(path):
-    print("the file was made at", os.path.getmtime(path), flush=True)
-    if(abs(os.path.getmtime(path)-time.time())<=5):#change this back
+    if(abs(os.path.getmtime(path)-time.time())<=5):
         return True
     return False
 
@@ -154,7 +147,6 @@ def login_2fa_response():
             return('', 204)
     return('', 417)
 
-#not finished, needs to recieve response from phone
 @authentication.route("/uploadaudio", methods=['POST'])
 def uploadaudio():
     if request.method == 'POST':
