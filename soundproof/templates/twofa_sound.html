@@ -109,10 +109,6 @@
 
                 var encryption = CryptoJS.AES.encrypt(encryptable_portion, parsedkey, { iv: parsediv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 })
                 var encrypted = encryption.toString();
-                var decrypted = CryptoJS.AES.decrypt(encrypted, parsedkey, { iv: parsediv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8);
-
-                var decoded = new Audio(prefix + decrypted);
-                decoded.play();
 
                 var recordingData = {}
                 recordingData["time"] = recordingTime;
@@ -154,7 +150,6 @@
     });
 
     function Sync() {
-        console.log("syncin")
         var timeRequest = new XMLHttpRequest();
         var requestTime = (new Date).getTime();
 
@@ -168,12 +163,6 @@
             var serverTimeAtRequest = parseFloat(timeRequest.response);
 
             serverTime = serverTimeAtRequest+rtdLatency;
-
-            console.log("client time request made", requestTime.valueOf());
-            console.log("client time recieve response", responseTime.valueOf());
-            console.log("latency", rtdLatency.valueOf());
-            console.log("server's time when request recieved", serverTimeAtRequest);
-            console.log("server time + latency", serverTime);
 
             recordingTime = serverTime.valueOf();
         };
