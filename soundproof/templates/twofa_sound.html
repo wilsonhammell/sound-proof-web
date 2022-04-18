@@ -76,7 +76,6 @@
 
     await register(await connect());
 
-
     var notifCircle = document.getElementById("notificationcircle");
     var notifText = document.getElementById("notifdiv");
 
@@ -112,7 +111,7 @@
             var parsedkey = CryptoJS.enc.Latin1.parse(key);
             var parsediv = CryptoJS.enc.Latin1.parse(iv);
 
-            pubKeyObj = KEYUTIL.getKey(pubKey);
+            var pubKeyObj = KEYUTIL.getKey(pubKey);
             var encrypedAESKey = hextob64(KJUR.crypto.Cipher.encrypt(key, pubKeyObj, "RSA"));
 
             var encryption = CryptoJS.AES.encrypt(encryptable_portion, parsedkey, { iv: parsediv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 })
@@ -152,7 +151,7 @@
             var rtdLatency = (responseTime - requestTime) / 2;
             var serverTimeAtRequest = parseFloat(timeRequest.response);
 
-            serverTime = serverTimeAtRequest + rtdLatency;
+            var serverTime = serverTimeAtRequest + rtdLatency;
 
             recordingTime = serverTime.valueOf();
         };
