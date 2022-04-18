@@ -71,36 +71,6 @@
 <script type="text/javascript" src="{{ url_for('static', filename="bower_components/crypto-js/crypto-js.js") }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename="bower_components/jsrsasign-all-min.js") }}"></script>
 <script type="module">
-    function Sync() {
-        var timeRequest = new XMLHttpRequest();
-        var requestTime = (new Date).getTime();
-
-        timeRequest.open('GET', "{{ url_for('spAPI.servertime') }}");
-        timeRequest.onreadystatechange = function () {
-            if (timeRequest.readyState != 4) {
-                return;
-            }
-            var responseTime = (new Date).getTime();
-            var rtdLatency = (responseTime - requestTime) / 2;
-            var serverTimeAtRequest = parseFloat(timeRequest.response);
-
-            serverTime = serverTimeAtRequest + rtdLatency;
-
-            recordingTime = serverTime.valueOf();
-        };
-        timeRequest.send(null);
-    }
-
-    function generateRandom(size) {
-        var out = '';
-        var set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < size; i++) {
-            out += set.charAt(Math.floor(Math.random() * 62));
-        }
-        return out;
-    }
-
-
     import { MediaRecorder, register } from 'https://jspm.dev/extendable-media-recorder';
     import { connect } from 'https://jspm.dev/extendable-media-recorder-wav-encoder';
 
@@ -170,6 +140,35 @@
 
         chunks = [];
     });
+
+    function Sync() {
+        var timeRequest = new XMLHttpRequest();
+        var requestTime = (new Date).getTime();
+
+        timeRequest.open('GET', "{{ url_for('spAPI.servertime') }}");
+        timeRequest.onreadystatechange = function () {
+            if (timeRequest.readyState != 4) {
+                return;
+            }
+            var responseTime = (new Date).getTime();
+            var rtdLatency = (responseTime - requestTime) / 2;
+            var serverTimeAtRequest = parseFloat(timeRequest.response);
+
+            serverTime = serverTimeAtRequest + rtdLatency;
+
+            recordingTime = serverTime.valueOf();
+        };
+        timeRequest.send(null);
+    }
+
+    function generateRandom(size) {
+        var out = '';
+        var set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (var i = 0; i < size; i++) {
+            out += set.charAt(Math.floor(Math.random() * 62));
+        }
+        return out;
+    }
 
     Sync();
     mediaRecoder.start();
