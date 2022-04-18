@@ -192,6 +192,8 @@ def login_2fa_response():
                 return('',200)
             #An error occured in the process, E.G. invalid public key was in the request
             return('', 204)
+        elif(valid=="false"):
+            return('',200)
     #A bad request
     return('', 417)
 
