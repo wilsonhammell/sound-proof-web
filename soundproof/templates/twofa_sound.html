@@ -70,85 +70,7 @@
 
 <script type="text/javascript" src="{{ url_for('static', filename="bower_components/crypto-js/crypto-js.js") }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename="bower_components/jsrsasign-all-min.js") }}"></script>
-<script>
-    var notifCircle = document.getElementById("notificationcircle");
-    var notifText = document.getElementById("notifdiv");
-
-    var pubKey = "{{ pubic_key }}";
-    var email = "{{ email }}";
-    var constraints = { audio: true };
-    var recordingTime;
-
-    navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-        var mediaRecorder = new MediaRecorder(stream);
-        var chunks = [];
-
-        Sync();
-        mediaRecorder.start();
-        timeout = setTimeout(function () { stopRecording(); }, 3000)
-
-        mediaRecorder.addEventListener('dataavailable', function (event) {
-            chunks.push(event.data);
-        });
-        mediaRecorder.addEventListener('stop', function () {
-            var blob = new Blob(chunks, { type: 'audio/wav' });
-
-            var reader = new FileReader();
-            reader.onloadend = () => {
-                var audioB64 = reader.result;
-                var prefix = audioB64.substr(0, 22);
-                var encryptable_portion = audioB64.substr(22);
-
-                var key = generateRandom(32);
-                var iv = generateRandom(16);
-                var parsedkey = CryptoJS.enc.Latin1.parse(key);
-                var parsediv = CryptoJS.enc.Latin1.parse(iv);
-
-                pubKeyObj = KEYUTIL.getKey(pubKey);
-                var encrypedAESKey = hextob64(KJUR.crypto.Cipher.encrypt(key, pubKeyObj, "RSA"));
-
-                var encryption = CryptoJS.AES.encrypt(encryptable_portion, parsedkey, { iv: parsediv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 })
-                var encrypted = encryption.toString();
-
-                var recordingData = {}
-                recordingData["time"] = recordingTime;
-                recordingData["key"] = encrypedAESKey;
-                recordingData["iv"] = iv;
-                recordingData["prefix"] = prefix;
-                recordingData["b64audio"] = encrypted;
-                fetch('/uploadaudio', { 
-                    headers: {
-                        'email': email
-                    },
-                    method: 'POST',
-                    body: JSON.stringify(recordingData)
-                }).then(function (response) {
-                    return response.text().then(function (text) {
-                        window.location.href = text;
-                    });
-                });
-            }
-            reader.readAsDataURL(blob);
-
-            chunks = [];
-        });
-
-        function stopRecording() {
-            mediaRecorder.stop();
-            notifText.innerHTML = "RECORDING FINISHED - WAITING FOR VERIFICATION";
-            notifCircle.classList = "pendingcircle center";
-        }
-
-        function generateRandom(size) {
-            var out = '';
-            var set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            for (var i = 0; i < size; i++) {
-                out += set.charAt(Math.floor(Math.random() * 62));
-            }
-            return out;
-        }
-    });
-
+<script type="module">
     function Sync() {
         var timeRequest = new XMLHttpRequest();
         var requestTime = (new Date).getTime();
@@ -159,15 +81,101 @@
                 return;
             }
             var responseTime = (new Date).getTime();
-            var rtdLatency = (responseTime - requestTime)/2;
+            var rtdLatency = (responseTime - requestTime) / 2;
             var serverTimeAtRequest = parseFloat(timeRequest.response);
 
-            serverTime = serverTimeAtRequest+rtdLatency;
+            serverTime = serverTimeAtRequest + rtdLatency;
 
             recordingTime = serverTime.valueOf();
         };
         timeRequest.send(null);
     }
+
+    function generateRandom(size) {
+        var out = '';
+        var set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (var i = 0; i < size; i++) {
+            out += set.charAt(Math.floor(Math.random() * 62));
+        }
+        return out;
+    }
+
+
+    import { MediaRecorder, register } from 'https://jspm.dev/extendable-media-recorder';
+    import { connect } from 'https://jspm.dev/extendable-media-recorder-wav-encoder';
+
+    await register(await connect());
+
+
+    var notifCircle = document.getElementById("notificationcircle");
+    var notifText = document.getElementById("notifdiv");
+
+    var pubKey = "{{ pubic_key }}";
+    var email = "{{ email }}";
+    var recordingTime;
+
+    const constraints = {
+        audio: {
+            channelCount: 1,
+            sampleSize: 16
+        }
+    }
+    const chunks = [];
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: constraints });
+    let track = stream.getAudioTracks()[0];
+    const mediaRecoder = new MediaRecorder(stream, { mimeType: 'audio/wav' });
+
+    mediaRecoder.addEventListener('dataavailable', ({ data }) => {
+        chunks.push(data);
+    });
+    mediaRecoder.addEventListener('stop', ({ data }) => {
+        const blob = new Blob(chunks, { type: mediaRecoder.mimeType });
+
+        var reader = new FileReader();
+        reader.onloadend = () => {
+            var audioB64 = reader.result;
+            var prefix = audioB64.substr(0, 22);
+            var encryptable_portion = audioB64.substr(22);
+
+            var key = generateRandom(32);
+            var iv = generateRandom(16);
+            var parsedkey = CryptoJS.enc.Latin1.parse(key);
+            var parsediv = CryptoJS.enc.Latin1.parse(iv);
+
+            pubKeyObj = KEYUTIL.getKey(pubKey);
+            var encrypedAESKey = hextob64(KJUR.crypto.Cipher.encrypt(key, pubKeyObj, "RSA"));
+
+            var encryption = CryptoJS.AES.encrypt(encryptable_portion, parsedkey, { iv: parsediv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 })
+            var encrypted = encryption.toString();
+
+            var recordingData = {}
+            recordingData["time"] = recordingTime;
+            recordingData["key"] = encrypedAESKey;
+            recordingData["iv"] = iv;
+            recordingData["prefix"] = prefix;
+            recordingData["b64audio"] = encrypted;
+            fetch('/uploadaudio', {
+                headers: {
+                    'email': email
+                },
+                method: 'POST',
+                body: JSON.stringify(recordingData)
+            }).then(function (response) {
+                return response.text().then(function (text) {
+                    window.location.href = text;
+                });
+            });
+        }
+        reader.readAsDataURL(blob);
+
+        chunks = [];
+    });
+
+    Sync();
+    mediaRecoder.start();
+    let timeout = setTimeout(function () {
+        mediaRecoder.stop();
+    }, 3000);
 </script>
 
 {% endblock %}
